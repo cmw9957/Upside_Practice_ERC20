@@ -8,6 +8,8 @@ contract ERC20 {
 
     uint256 totalSupply;
 
+    mapping(address => mapping(address => uint256)) public allowance;
+
     constructor (string memory _name, string memory _symbol) {
         name = _name;
         symbol = _symbol;
@@ -28,10 +30,9 @@ contract ERC20 {
     }
 
     function approve(address _spender, uint256 _amount) public payable {
-
+        allowance[msg.sender][_spender] += _amount;
     }
 
     function transferFrom(address _from, address _to, uint256 _amount) public payable {
-
     }
 }
