@@ -8,6 +8,7 @@ contract ERC20 {
 
     uint256 totalSupply;
 
+    mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) public allowance;
 
     constructor (string memory _name, string memory _symbol) {
@@ -20,8 +21,10 @@ contract ERC20 {
 
     function transfer(address _to, uint256 _amount) public payable {
         require(!isPause, "Paused now.");
-        bool success = payable(_to).send(_amount);
-        require(success, "ETH transfer failed.");
+        require(totalSupply >= _amount, "totalSupply insufficient.");
+        
+        totalSupply -= _amount;
+        balances[_to] += _amount;
     }
 
     function pause() public {
