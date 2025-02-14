@@ -19,7 +19,7 @@ contract ERC20 {
     }
 
     function transfer(address _to, uint256 _amount) public payable {
-        require(isPause, "Paused now.");
+        require(!isPause, "Paused now.");
         bool success = payable(_to).send(_amount);
         require(success, "ETH transfer failed.");
     }
