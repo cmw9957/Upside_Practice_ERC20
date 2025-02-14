@@ -58,6 +58,7 @@ contract ERC20 is EIP712 {
     }
 
     function permit(address _owner, address _spender, uint256 _value, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) public {
+        require(block.timestamp <= _deadline, "Signature expired");
         bytes32 structHash = keccak256(abi.encode(
             keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
             _owner,
@@ -70,7 +71,7 @@ contract ERC20 is EIP712 {
         bytes32 digest = _toTypedDataHash(structHash);
         address recoveredAddress = ECDSA.recover(digest, v, r, s);
 
-        require(recoveredAddress == _owner, "Invalid signature");
+        require(recoveredAddress == _owner, "INVALID_SIGNER");
 
         allowance[_owner][_spender] += _value;
     }
