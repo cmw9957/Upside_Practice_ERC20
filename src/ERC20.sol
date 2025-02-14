@@ -28,7 +28,7 @@ contract ERC20 {
     }
 
     function pause() public {
-        require(msg.sender != owner, "You are not owner.");
+        require(msg.sender == owner, "You are not owner.");
         isPause = true;
     }
 
