@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract ERC20 is EIP712 {
     string name;
@@ -56,7 +57,21 @@ contract ERC20 is EIP712 {
         return _hashTypedDataV4(structHash);
     }
 
-    function permit(address _owner, address _spender, uint256 _value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public {
+    function permit(address _owner, address _spender, uint256 _value, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) public {
+        bytes32 structHash = keccak256(abi.encode(
+            keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+            _owner,
+            _spender,
+            _value,
+            nonces[_owner]++,
+            _deadline
+        ));
 
+        bytes32 digest = _toTypedDataHash(structHash);
+        address recoveredAddress = ECDSA.recover(digest, v, r, s);
+
+        require(recoveredAddress == _owner, "Invalid signature");
+
+        allowance[_owner][_spender] += _value;
     }
 }
