@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
-contract ERC20 {
+contract ERC20 is EIP712 {
     string name;
     string symbol;
 
@@ -19,7 +19,7 @@ contract ERC20 {
     mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public nonces;
 
-    constructor (string memory _name, string memory _symbol) {
+    constructor (string memory _name, string memory _symbol) EIP712(_name, _symbol) {
         name = _name;
         symbol = _symbol;
 
@@ -52,8 +52,8 @@ contract ERC20 {
         balances[_to] += _amount;
     }
 
-    function _toTypedDataHash(bytes32 structHash) public returns (bytes32) {
-        
+    function _toTypedDataHash(bytes32 structHash) public view returns (bytes32) {
+        return _hashTypedDataV4(structHash);
     }
 
     function permit(address _owner, address _spender, uint256 _value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public {
