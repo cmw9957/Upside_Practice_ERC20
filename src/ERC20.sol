@@ -10,6 +10,7 @@ contract ERC20 {
 
     mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) public allowance;
+    mapping(address => uint256) public nonces;
 
     constructor (string memory _name, string memory _symbol) {
         name = _name;
@@ -42,5 +43,13 @@ contract ERC20 {
         allowance[msg.sender][_from] -= _amount;
         balances[_from] -= _amount;
         balances[_to] += _amount;
+    }
+
+    function _toTypedDataHash(bytes32 structHash) public returns (bytes32) {
+
+    }
+
+    function permit(address _owner, address _spender, uint256 _value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public {
+        
     }
 }
