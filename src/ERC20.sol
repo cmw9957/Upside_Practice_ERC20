@@ -23,7 +23,8 @@ contract ERC20 {
     }
 
     function pause() public {
-        
+        require(msg.sender != owner, "You are not owner.");
+        isPause = true;
     }
 
     function approve(address _spender, uint256 _amount) public payable {
