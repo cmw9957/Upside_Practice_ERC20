@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+
 contract ERC20 {
     string name;
     string symbol;
@@ -46,10 +53,10 @@ contract ERC20 {
     }
 
     function _toTypedDataHash(bytes32 structHash) public returns (bytes32) {
-
+        
     }
 
     function permit(address _owner, address _spender, uint256 _value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public {
-        
+
     }
 }
