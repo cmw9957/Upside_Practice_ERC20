@@ -12,12 +12,12 @@ contract ERC20 {
     bytes32 private immutable hashedName;
     bytes32 private immutable hashedVersion;
 
-    string private immutable name;
-    string private immutable version;
-    string private immutable symbol;
+    string private name;
+    string private version;
+    string private symbol;
 
     address owner;
-    uint256 public constant totalSupply = 1_000_000 * decimal();
+    uint256 public totalSupply = 1_000_000 * 10^decimals();
     bool paused = false;
 
     mapping(address => uint256) balances;
@@ -58,8 +58,8 @@ contract ERC20 {
         _;
     }
 
-    function decimal() internal {
-        return 10**18;
+    function decimals() internal returns (uint8) {
+        return 18;
     }
 
     function transfer(address _to, uint256 _amount) public payable isNotPause() isSupplySufficient(_amount) {
@@ -107,6 +107,26 @@ contract ERC20 {
         return toTypedDataHash(_domainSeparator(), structHash);
     }
 
+    function tryRecover(
+        bytes32 hash,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal pure returns (address recovered) {
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return address(0);
+        }
+
+        address signer = ecrecover(hash, v, r, s);
+
+        return signer;
+    }
+
+    function recover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {
+        address recovered = tryRecover(hash, v, r, s);
+        return recovered;
+    }
+
     function permit(address _owner, address _spender, uint256 _value, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) public isExpire(_deadline) {
         bytes32 structHash = keccak256(abi.encode(
             keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
@@ -118,7 +138,7 @@ contract ERC20 {
         ));
 
         bytes32 digest = _toTypedDataHash(structHash);
-        address recoveredAddress = ECDSA.recover(digest, v, r, s);
+        address recoveredAddress = recover(digest, v, r, s);
 
         require(recoveredAddress == _owner, "INVALID_SIGNER");
 
