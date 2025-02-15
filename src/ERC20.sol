@@ -2,52 +2,58 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-
-contract ERC20 is EIP712 {
+contract ERC20 {
     string name;
     string symbol;
 
     address owner;
-
-    bool isPause = false;
-
-    uint256 totalSupply;
+    uint256 public constant totalSupply = 1_000_000 * 10**18;
+    bool paused = false;
 
     mapping(address => uint256) balances;
-    mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public nonces;
+    mapping(address => mapping(address => uint256)) public allowance;
 
-    constructor (string memory _name, string memory _symbol) EIP712(_name, _symbol) {
+    constructor (string memory _name, string memory _symbol) {
         name = _name;
         symbol = _symbol;
-
         owner = msg.sender;
-        totalSupply = 10000 ether;
     }
 
-    function transfer(address _to, uint256 _amount) public payable {
-        require(!isPause, "Paused now.");
-        require(totalSupply >= _amount, "totalSupply insufficient.");
+    modifier onlyOwner() {
+        require(msg.sender == owner, "You are not owner.");
+        _;
+    }
 
+    modifier isNotPause() {
+        require(!paused, "Paused now.");
+        _;
+    }
+
+    modifier isExpire(uint256 deadline) {
+        require(block.timestamp <= deadline, "Signature expired");
+        _;
+    }
+
+    modifier isSupplySufficient(uint256 amount) {
+        require(totalSupply >= amount, "totalSupply insufficient.");
+        _;
+    }
+
+    function transfer(address _to, uint256 _amount) public payable isNotPause() isSupplySufficient(_amount) {
         totalSupply -= _amount;
         balances[_to] += _amount;
     }
 
-    function pause() public {
-        require(msg.sender == owner, "You are not owner.");
-        isPause = true;
+    function pause() public onlyOwner() {
+        paused = true;
     }
 
     function approve(address _spender, uint256 _amount) public payable {
         allowance[msg.sender][_spender] += _amount;
     }
 
-    function transferFrom(address _from, address _to, uint256 _amount) public payable {
-        require(isPause, "Paused now.");
-        
+    function transferFrom(address _from, address _to, uint256 _amount) public payable isNotPause() {
         allowance[msg.sender][_from] -= _amount;
         balances[_from] -= _amount;
         balances[_to] += _amount;
@@ -57,8 +63,7 @@ contract ERC20 is EIP712 {
         return _hashTypedDataV4(structHash);
     }
 
-    function permit(address _owner, address _spender, uint256 _value, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) public {
-        require(block.timestamp <= _deadline, "Signature expired");
+    function permit(address _owner, address _spender, uint256 _value, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) public isExpire(_deadline) {
         bytes32 structHash = keccak256(abi.encode(
             keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
             _owner,
