@@ -5,12 +5,12 @@ pragma solidity ^0.8.0;
 contract ERC20 {
     bytes32 private constant TYPE_HASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
 
-    bytes32 private immutable cachedDomainSeparator;
-    uint256 private immutable cachedChainId;
     address private immutable cachedThis;
-
     bytes32 private immutable hashedName;
-    bytes32 private immutable hashedVersion;
+
+    bytes32 private domainSeparator;
+    bytes32 private hashedVersion;
+    uint256 private chainId;
 
     string private name;
     string private version;
@@ -33,8 +33,8 @@ contract ERC20 {
         hashedName = keccak256(bytes(_name));
         hashedVersion = keccak256(bytes("1"));
 
-        cachedChainId = block.chainid;
-        cachedDomainSeparator = buildDomainSeparator();
+        chainId = block.chainid;
+        domainSeparator = buildDomainSeparator();
         cachedThis = address(this);
     }
 
@@ -82,8 +82,8 @@ contract ERC20 {
     }
 
     function _domainSeparator() internal view returns (bytes32) {
-        if (address(this) == cachedThis && block.chainid == cachedChainId) {
-            return cachedDomainSeparator;
+        if (address(this) == cachedThis && block.chainid == chainId) {
+            return domainSeparator;
         } else {
             return buildDomainSeparator();
         }
@@ -143,5 +143,11 @@ contract ERC20 {
         require(recoveredAddress == _owner, "INVALID_SIGNER");
 
         allowance[_owner][_spender] += _value;
+    }
+
+    function upgradeVersion(string memory newVersion) external onlyOwner {
+        version = newVersion;
+        hashedVersion = keccak256(bytes(newVersion));
+        domainSeparator = _domainSeparator();
     }
 }
