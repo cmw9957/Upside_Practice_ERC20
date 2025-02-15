@@ -17,7 +17,7 @@ contract ERC20 {
     string private symbol;
 
     address owner;
-    uint256 public totalSupply = 1_000_000 * 10^decimals();
+    uint256 public totalSupply = 1_000_000 * decimals();
     bool paused = false;
 
     mapping(address => uint256) balances;
@@ -58,8 +58,8 @@ contract ERC20 {
         _;
     }
 
-    function decimals() internal returns (uint8) {
-        return 18;
+    function decimals() internal pure returns (uint256) {
+        return 10**18;
     }
 
     function transfer(address _to, uint256 _amount) public payable isNotPause() isSupplySufficient(_amount) {
