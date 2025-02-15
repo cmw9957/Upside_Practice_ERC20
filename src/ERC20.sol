@@ -7,7 +7,7 @@ contract ERC20 {
     string symbol;
 
     address owner;
-    uint256 public constant totalSupply = 1_000_000 * 10**18;
+    uint256 public constant totalSupply = 1_000_000 * decimal();
     bool paused = false;
 
     mapping(address => uint256) balances;
@@ -38,6 +38,10 @@ contract ERC20 {
     modifier isSupplySufficient(uint256 amount) {
         require(totalSupply >= amount, "totalSupply insufficient.");
         _;
+    }
+
+    function decimal() internal {
+        return 10**18;
     }
 
     function transfer(address _to, uint256 _amount) public payable isNotPause() isSupplySufficient(_amount) {
