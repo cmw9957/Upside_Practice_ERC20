@@ -98,6 +98,7 @@ contract ERC20 {
 
     // approve 후, 대리 송금 함수
     function transferFrom(address _from, address _to, uint256 _amount) public payable isNotPause() {
+        require(allowance[msg.sender][_from] >= _amount, "Not enough amount or No allowance.");
         allowance[msg.sender][_from] -= _amount;
         balances[_from] -= _amount;
         balances[_to] += _amount;
@@ -151,8 +152,7 @@ contract ERC20 {
 
     // 서명자의 주소 복구 (복구 실패 시 주소 0 반환)
     function recover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {
-        address recovered = tryRecover(hash, v, r, s);
-        return recovered;
+        return tryRecover(hash, v, r, s);
     }
 
     // 서명된 메시지를 통해 spender에게 토큰을 승인
