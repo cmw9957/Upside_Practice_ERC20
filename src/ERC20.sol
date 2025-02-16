@@ -118,11 +118,11 @@ contract ERC20 {
     }
 
     // EIP-712 구조체 hash로 type data hash 생성
-    function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash) internal pure returns (bytes32 digest) {
+    function toTypedDataHash(bytes32 domainSepa, bytes32 structHash) internal pure returns (bytes32 digest) {
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, hex"19_01")
-            mstore(add(ptr, 0x02), domainSeparator)
+            mstore(add(ptr, 0x02), domainSepa)
             mstore(add(ptr, 0x22), structHash)
             digest := keccak256(ptr, 0x42)
         }
